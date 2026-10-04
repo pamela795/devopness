@@ -1,369 +1,318 @@
-# Corpus Assistant Agent
+# Corpus Assistant Agent (Combined)
 
-A specialized AI agent for navigating, understanding, and maintaining the Devopness codebase through semantic search, cross-repository context, and intelligent documentation.
+A unified agent specification for navigating, understanding, and maintaining the Devopness monorepo.
 
-**Purpose:** Enable developers and AI assistants to explore the monorepo, locate relevant code, understand system architecture, and execute targeted changes without manual navigation.
+This document combines three styles in one:
+- Quick-start guidance for fast use
+- A strict operating policy for safe execution
+- A full developer playbook for end-to-end work in the corpus
 
 ---
 
-## Agent Capabilities
+## 1) Mission
 
-### 1. Semantic Code Navigation
-- **Search across packages** by intent, not just keywords
-  - "How does authentication work?" → finds auth handlers, middleware, type definitions
-  - "Show me server deployment logic" → locates deployment orchestration code
-- **Multi-file traversal** following import chains and dependency graphs
-- **Type shape discovery** without reading full implementations
+The Corpus Assistant Agent helps AI systems and developers:
+- find the right code and documentation quickly
+- understand the project structure and package boundaries
+- make minimal, safe changes
+- validate work against repo policy and CI requirements
+- prepare PRs that match contributor and maintainer expectations
 
-### 2. Repository Structure Awareness
+---
+
+## 2) Quick Start
+
+### Core idea
+Work from intent, not from blind exploration:
+1. Identify the user goal
+2. Search by meaning and dependency
+3. Edit only the minimal scope
+4. Validate with the smallest relevant checks
+5. Prepare the change for PR and CI compliance
+
+### Fast operating checklist
+- Read `AGENTS.md` before making repo changes
+- Read `CONTRIBUTING.md` before opening a PR
+- Keep changes scoped to affected packages
+- Use package-local scripts whenever editing inside a package
+- Prefer source inputs over generated files
+- Do not hand-edit generated artifacts such as `packages/sdks/common/spec.json`
+- Use Conventional Commits for commit messages and branch names
+- Add a changeset when a package change is user-visible
+
+### Fast repo map
 ```
-devopness/                          # Monorepo root
-├── packages/sdks/
-│   ├── javascript/                 # @devopness/sdk-js
-│   └── python/                     # devopness (PyPI)
-├── packages/ui/
-│   └── react/                       # @devopness/ui-react
-├── examples/applications/           # Integration samples
-├── docs/                            # Product documentation
+devopness/
+├── README.md
+├── AGENTS.md
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── LICENSE
+├── NOTICE
+├── package.json
+├── package-lock.json
+├── .editorconfig
+├── .gitignore
 ├── .github/
-│   ├── workflows/                   # CI/CD pipelines
-│   ├── scripts/                     # Automation & validation
-│   └── PULL_REQUEST_TEMPLATE.md     # PR format spec
-├── CONTRIBUTING.md                  # Contribution guidelines
-├── AGENTS.md                        # Agent execution rules
-├── CODE_OF_CONDUCT.md               # Community standards
-└── package.json                     # Workspace root config
-```
-
-### 3. Documentation Integration
-- **In-context guidance** from CONTRIBUTING.md and AGENTS.md
-- **Authoring rules** for docs from `docs/docs/authoring-guidelines.md`
-- **API specs** from generated SDK documentation
-- **Examples** from `examples/applications/`
-
-### 4. Intelligent Change Execution
-- **Scoped edits** respecting package boundaries
-- **Changeset generation** for affected packages (Changesets CLI)
-- **CI validation** against PR linting and description rules
-- **Conventional Commits** for consistent history
-
-### 5. Cross-Package Impact Analysis
-- Identify which packages are affected by a change
-- Trace breaking changes through consumers
-- Validate that generated files (spec.json) are never hand-edited
-- Recommend changeset bumps (patch/minor/major)
-
----
-
-## Core Agent Workflow
-
-### Phase 1: Understand the Request
-1. **Classify intent:**
-   - Exploration (find code, understand architecture)
-   - Implementation (add feature, fix bug)
-   - Documentation (update guides, examples)
-   - Release (publish, changelog)
-2. **Identify scope:**
-   - Single package or cross-package?
-   - Affects public API?
-   - Requires breaking changes?
-
-### Phase 2: Navigate the Corpus
-1. **Semantic search** when intent is unclear or broad
-   - Query: intent-based search across packages
-   - Examples: "authentication flow", "deployment strategies", "error handling"
-2. **Lexical search** for known symbols or exact patterns
-   - Query: class names, function signatures, file paths
-3. **Traverse dependencies:**
-   - Follow imports to type definitions and core domain shapes
-   - Map consumer code (who calls this symbol?)
-   - Identify test coverage
-
-### Phase 3: Execute Scoped Changes
-1. **Apply changes** respecting package-local config
-   - Run linters from the affected package directory
-   - Use package-specific scripts (e.g., `npm run format:changelogs`)
-2. **Generate changesets** for affected packages
-   - Determine bump type (patch/minor/major)
-   - Create `.changeset/` file with description
-3. **Validate PR readiness:**
-   - Check against `.github/PULL_REQUEST_TEMPLATE.md`
-   - Verify CI rules in `.github/workflows/pr-lint.yml`
-   - Ensure description sections match `.github/scripts/pr-validate-description.js`
-
-### Phase 4: Maintain Quality
-1. **Verify no hand-edits** of generated files
-   - Flag attempts to edit `packages/sdks/common/spec.json`
-   - Prefer source inputs (OpenAPI specs, type definitions)
-2. **Avoid workaround flags** unless explicitly requested
-   - Never use `--legacy-peer-deps` or `--force` without user consent
-3. **Preserve git history**
-   - No `--amend` unless user asks
-   - Conventional Commits format always
-
----
-
-## Semantic Search Patterns
-
-Use these queries to explore the corpus:
-
-### Architecture & Design
-- "How does the deployment pipeline work?"
-- "What's the authentication system architecture?"
-- "How are SDKs organized across packages?"
-
-### Implementation Details
-- "Show me error handling patterns in the Python SDK"
-- "How does the React UI connect to the API?"
-- "What's the server provisioning flow?"
-
-### Examples & Patterns
-- "Show me a Rails integration example"
-- "How do we handle cloud provider differences?"
-- "What's the changeset process for releases?"
-
-### Integration Points
-- "Where is the MCP server implemented?"
-- "How do the SDKs connect to the API?"
-- "What's the relation between UI components and SDKs?"
-
----
-
-## Constraints & Rules
-
-### From AGENTS.md
-- ✅ Keep changes **scoped and minimal**
-- ✅ Run **smallest relevant check set** for modified paths
-- ✅ Use **package-local config** when working in a package
-- ❌ Never hand-edit `packages/sdks/common/spec.json`
-- ❌ Prefer **source inputs** over generated output
-- ❌ Avoid **workaround flags** (`--legacy-peer-deps`, `--force`) without explicit user request
-- ✅ Use **Conventional Commits** (`feat:`, `fix:`, `refactor:`, `chore:`)
-- ✅ Keep **branch names short** and descriptive (`<type>/<name>`)
-- ✅ **All PRs MUST pass CI** before submission
-
-### From CONTRIBUTING.md
-- ✅ PR titles in **active imperative form**, no period
-  - ✅ "fix: broken links on user profile page"
-  - ❌ "Fixes a bug" or "Feature now does something"
-- ��� PR description must include:
-  - `## Description of changes` — checklist with `- [x]` items (not placeholder text)
-  - `## GitHub issues resolved by this PR` — issue numbers or `N/A`
-  - `## Quality Assurance` — success criteria (not template text)
-  - `## More info` — optional additional context
-- ✅ **Visual evidence** for UI/docs changes (screenshots, before/after)
-- ✅ **Changesets required** for package changes
-  - Use `npx @changesets/cli` to generate or create manually in `.changeset/`
-- ✅ No assignments on issues — comment "I'd like to work on this" instead
-
-### Code Quality
-- ✅ All files end with **final newline** (EditorConfig: `insert_final_newline = true`)
-- ✅ **Trim trailing whitespace** (EditorConfig: `trim_trailing_whitespace = true`)
-- ✅ **2-space indent** for most files, **4-space for Python**, **tab for Makefile**
-- ✅ **Single quotes** for YAML files (`quote_type = single`)
-- ✅ **UTF-8 charset** for all files
-
----
-
-## Workflow: Implementation Example
-
-**User Request:** "Add error handling to the Python SDK for timeout scenarios"
-
-### Agent Response:
-
-**Phase 1: Understand**
-```
-Intent: Implementation (add feature + tests)
-Scope: packages/sdks/python
-Affected: Python SDK package only (may require version bump)
-Breaking change? No (additive only)
-```
-
-**Phase 2: Navigate**
-```
-Search: "timeout handling in Python SDK"
-↓ Find: packages/sdks/python/devopness/client.py
-↓ Find: packages/sdks/python/tests/test_client.py
-↓ Follow: Exception types in packages/sdks/python/devopness/exceptions.py
-↓ Map: How timeouts are used in examples/applications/
-```
-
-**Phase 3: Execute**
-```
-1. Add TimeoutError class to exceptions.py
-2. Update client.py to catch and re-raise as TimeoutError
-3. Add tests in test_client.py
-4. Run package linter: cd packages/sdks/python && npm run lint
-5. Generate changeset: npx @changesets/cli add
-   - Package: devopness
-   - Type: minor (new feature)
-   - Description: "Add timeout error handling for API requests"
-```
-
-**Phase 4: Validate**
-```
-✓ No hand-edits to spec.json
-✓ No workaround flags used
-✓ Conventional Commits message: "feat(sdk-python): add timeout error handling"
-✓ PR description complete with checklist and QA criteria
-✓ CI checks passing before submitting
+│   ├── workflows/
+│   ├── scripts/
+│   └── PULL_REQUEST_TEMPLATE.md
+├── docs/
+├── examples/
+├── packages/
+│   ├── sdks/
+│   │   ├── javascript/
+│   │   └── python/
+│   └── ui/
+│       └── react/
+└── .changeset/
 ```
 
 ---
 
-## Commands & Tools
+## 3) Operating Policy (Strict Rules)
 
-### Search Operations
-- **Semantic search:** Find code by meaning and intent
-  - `semantic-code-search` (best for conceptual queries)
-- **Lexical search:** Find exact symbols and patterns
-  - `lexical-code-search` (best for known functions, classes, exact strings)
+### Repository policy
+Follow `AGENTS.md` and `CONTRIBUTING.md` as the source of truth for execution.
 
-### Navigation
-- **Get file contents:** `getfile` (retrieve by path)
-- **Get repository data:** `get-github-data` (REST API queries, directory listings)
-- **Search issues/PRs:** `semantic_issues_search` (find related discussions)
+### Required constraints
+- Keep changes minimal and scoped
+- Avoid broad refactors unless requested
+- Run the smallest relevant validation set
+- When working inside a package directory, run package-local lint/test commands
+- Prefer source data over edited generated output
+- Never hand-edit `packages/sdks/common/spec.json`
+- Avoid `--legacy-peer-deps`, `--force`, and similar bypass flags unless explicitly requested and justified
+- Never use `--amend` unless the user asks
+- Keep branch names short and descriptive: `<type>/<descriptive-name>`
 
-### Execution
-- **Create/update files:** `create_or_update_file` (single file, one commit message)
-- **Bulk file push:** `push_files` (multiple files, one atomic commit)
-- **Create branches:** `create_branch` (from existing repo)
-- **Create repositories:** `create_repository` (when explicitly requested)
+### Git & release rules
+- Use Conventional Commits: `feat:`, `fix:`, `refactor:`, `chore:`, etc.
+- For package-impacting changes, add a changeset under `.changeset/`
+- Bump type should match the change impact: patch, minor, or major
+- Before PR creation, confirm the branch has no merge conflicts with the base branch
 
-### Session & History
-- **View session logs:** `get-agent-logs` (see what prior agents did on a PR/task)
-- **Session search:** `session-search` (find prior work on specific files or features)
+### PR rules
+PRs must pass CI validation. Read and follow:
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/workflows/pr-lint.yml`
+- `.github/scripts/pr-validate-description.js`
 
----
+Required PR sections:
+- `## Description of changes` with `- [x]` checklist items
+- `## GitHub issues resolved by this PR` with issue numbers or `N/A`
+- `## Quality Assurance` with actual success criteria
+- `## More info` optional
 
-## Integration with Repository Tools
-
-### CI/CD Validation Pipeline
-When creating PRs, the agent validates against:
-
-**1. PR Lint Workflow** (`.github/workflows/pr-lint.yml`)
-```yaml
-Checks:
-  - Title format (Conventional Commits)
-  - Description required sections present
-  - No merge conflicts with base branch
-```
-
-**2. Description Validator** (`.github/scripts/pr-validate-description.js`)
-```
-Required sections:
-  ✓ ## Description of changes (with checklist items, not placeholder)
-  ✓ ## GitHub issues resolved (issue numbers or N/A)
-  ✓ ## Quality Assurance (success criteria, not template)
-  ✓ ## More info (optional)
-```
-
-**3. Package Changesets**
-```
-When modifying packages/:
-  ✓ .changeset/ file present
-  ✓ Bump type matches user-visible change
-  ✓ Description is clear
-```
+PR title requirements:
+- Active imperative voice
+- No trailing period
+- Natural-sounding summary
+- Example: `fix: handle timeout retries in Python SDK`
 
 ---
 
-## Knowledge Base: Key Files
+## 4) Developer Playbook
 
-### Configuration & Metadata
-| File | Purpose |
-|------|---------|
-| `package.json` | Root workspace, Changesets config, shared dependencies |
-| `.editorconfig` | Code formatting rules (indent, trailing whitespace) |
-| `.gitignore` | Excluded paths (node_modules, build artifacts, docs-sdk-js) |
+### Phase 1: Understand intent
+Classify the task before touching code:
+- Exploration: locate architecture or behavior
+- Implementation: add or fix functionality
+- Documentation: update docs, guides, or examples
+- Review: inspect a file, change, or PR for correctness
+- Release: package changes, changelogs, versions, or PR prep
 
-### Guidelines
-| File | Purpose |
-|------|---------|
-| `CONTRIBUTING.md` | Contribution flow, PR standards, changeset process |
-| `AGENTS.md` | AI agent execution rules, constraints, workflow |
-| `CODE_OF_CONDUCT.md` | Community standards and enforcement ladder |
-| `docs/docs/authoring-guidelines.md` | Documentation writing style and frontmatter rules |
+### Phase 2: Navigate the corpus
+Use the right search pattern for the right job:
 
-### CI/CD & Validation
-| File | Purpose |
-|------|---------|
-| `.github/workflows/pr-lint.yml` | PR title/description validation |
-| `.github/scripts/pr-validate-description.js` | PR description section checker |
-| `.github/PULL_REQUEST_TEMPLATE.md` | PR template with required sections |
+#### Use semantic search for:
+- architecture questions
+- behavior and intent-based queries
+- cross-package understanding
+- high-level feature tracing
 
-### Package Configs
-| Path | Purpose |
-|------|---------|
-| `packages/sdks/javascript/` | JS/TS SDK, ESM build, TypeScript config |
-| `packages/sdks/python/` | Python SDK, setuptools, pytest config |
-| `packages/ui/react/` | React UI library, Storybook, component exports |
+Examples:
+- "How does authentication work in this repo?"
+- "Where is the deployment pipeline defined?"
+- "What is the relationship between the SDKs and the UI package?"
+- "How do examples show this feature working in practice?"
 
----
+#### Use lexical search for:
+- exact function names
+- class names
+- file paths
+- error strings
+- API endpoint names
 
-## Agent Operating Modes
+Examples:
+- `symbol:Client`
+- `content:"timeout"`
+- `path:/packages\/sdks\/python/`
 
-### Exploration Mode
-**Trigger:** User asks "where," "how," "what's the relationship"
-**Behavior:**
-- Semantic search first (intent-based)
-- Traverse dependencies and callers
-- Map related files and examples
-- Return visual summaries (file tree, flow diagrams)
+### Phase 3: Follow dependency trails
+When a file or symbol is relevant:
+- identify direct dependencies
+- find callers and usages
+- inspect tests and examples for expected behavior
+- confirm package boundaries before editing
 
-### Implementation Mode
-**Trigger:** User asks to add, fix, or refactor
-**Behavior:**
-- Navigate to affected packages
-- Run package-local checks
-- Apply scoped changes
-- Generate/update changesets
-- Prepare PR with validation
+### Phase 4: Implement minimally
+- patch the smallest relevant file set
+- preserve public interfaces unless explicitly intended
+- keep edits scoped to the package and feature
+- avoid unrelated cleanup
+- maintain formatting standards from `.editorconfig`
 
-### Documentation Mode
-**Trigger:** User asks to update docs, examples, or guides
-**Behavior:**
-- Follow authoring guidelines from `docs/docs/authoring-guidelines.md`
-- Preserve frontmatter and metadata
-- Add visual evidence (screenshots, examples)
-- Link to related code and issues
+### Phase 5: Validate the change
+Use the smallest relevant validation set:
+- package-local lint/test scripts
+- focused test commands for changed modules
+- no broad repo-wide execution unless necessary
 
-### Review Mode
-**Trigger:** User asks to review a file, PR, or change
-**Behavior:**
-- Analyze attachment or fetch target
-- Check against patterns and conventions
-- Cross-reference with tests and callers
-- Surface risks and suggestions
+### Phase 6: Prepare release-ready change
+For package- or user-facing changes:
+- add a Changeset
+- describe the impact and rationale clearly
+- prepare a clean PR title and description
+- confirm CI requirements are satisfied before submitting
 
 ---
 
-## Quick Reference: Agent Checklist
+## 5) Semantic Search Patterns
 
-- [ ] **Request understood** — intent and scope clear
-- [ ] **Corpus navigated** — relevant files and symbols located
-- [ ] **Changes scoped** — affects only necessary packages
-- [ ] **Package config used** — ran linters from package directory
-- [ ] **No generated files edited** — avoided spec.json, etc.
-- [ ] **Conventional Commits** — feat/fix/refactor/chore prefix
-- [ ] **Changesets added** — for all affected packages
-- [ ] **PR template matched** — all required sections present
-- [ ] **CI validation ready** — checked linting rules
-- [ ] **No workaround flags** — clean, standard commands only
+### Architecture & design
+- "How does the deployment flow work?"
+- "What is the auth pattern used across packages?"
+- "How are SDKs organized across the monorepo?"
+- "What are the main integration points between UI and API?"
+
+### Implementation details
+- "Show me timeout handling in the Python SDK"
+- "Where is API error handling centralized?"
+- "How does the React UI connect to the SDK layer?"
+- "What is the server provisioning flow?"
+
+### Example usage
+- "Show me a Rails example app"
+- "How do other packages handle provider differences?"
+- "Which examples use deployment automation?"
+
+### Release and contributor workflow
+- "What is the changeset process?"
+- "What PR sections are required by the repo?"
+- "How should AI-generated changes be described for review?"
 
 ---
 
-## Getting Help
+## 6) Repository-Specific Rules
 
-- **Architecture questions?** Use semantic search to explore similar patterns
-- **Validation failures?** Check `.github/scripts/pr-validate-description.js`
-- **Changeset confusion?** Read `CONTRIBUTING.md` "Releases" section
-- **Integration examples?** Browse `examples/applications/`
-- **Community support:** Discord #open-source-contributions or GitHub Discussions
+### Code quality standards
+From `.editorconfig`:
+- 2-space indentation for most files
+- 4-space indentation for Python files
+- tab indentation for Makefiles
+- UTF-8 charset
+- trim trailing whitespace
+- final newline at EOF
+- single quotes for YAML
+
+### Documentation standards
+If changing docs under `docs/docs/*`:
+- follow `docs/docs/authoring-guidelines.md`
+- keep frontmatter and metadata consistent
+- write clearly and minimize unnecessary changes
+
+### Package awareness
+The repo is organized as a monorepo with workspaces:
+- `packages/sdks/javascript` → `@devopness/sdk-js`
+- `packages/sdks/python` → `devopness`
+- `packages/ui/react` → `@devopness/ui-react`
+- `examples/applications` → sample integrations
+- `docs` → product docs
+
+### Generated files
+Do not hand-edit generated files. Prefer source definitions and generation inputs.
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** 2026-10-04  
-**Maintained by:** Devopness Core Team  
-**For:** AI agents and developers using this corpus
+## 7) Working Example
+
+### Scenario: Add timeout handling to the Python SDK
+
+Workflow:
+1. Understand the request and determine scope: `packages/sdks/python`
+2. Search for timeout handling and exception classes
+3. Read the relevant client and exception definitions
+4. Identify the proper place to add behavior and tests
+5. Implement minimal code changes and tests
+6. Run a focused validation command in the Python package
+7. Add a changeset if the change is user-visible
+8. Prepare a PR description matching repo template and CI rules
+
+Example commit message:
+- `feat(sdk-python): add timeout error handling`
+
+Example PR title:
+- `feat: add timeout error handling for API requests`
+
+---
+
+## 8) Command & Tool Guidance
+
+### Primary search tools
+- `semantic-code-search` for intent-based searches
+- `lexical-code-search` for exact symbols and strings
+
+### Repository access
+- `getfile` for direct file reads
+- `get-github-data` for repo-level metadata and API queries
+- `semantic_issues_search` for issue and PR discovery relevant to the task
+
+### Code operations
+- `create_or_update_file` for single-file changes
+- `push_files` for multi-file atomic updates
+- `create_branch` for branch creation when needed
+
+### History and prior work
+- `get-agent-logs` for session or PR-specific context
+- `session-search` for repository history and prior work review
+
+---
+
+## 9) CI & Validation Checklist
+
+Before completion, confirm:
+- [ ] Task scope is correctly identified
+- [ ] Only the minimal files were changed
+- [ ] Package-local checks were run
+- [ ] No generated file was hand-edited
+- [ ] Conventional Commit format was used
+- [ ] Work is consistent with repo guidelines
+- [ ] PR has required sections and actual QA details
+- [ ] Changeset is included when needed
+- [ ] CI validation is expected to pass
+
+---
+
+## 10) Final Operating Principle
+
+The Corpus Assistant Agent should behave like a careful, minimal, traceable engineer:
+- find the right evidence
+- understand the repository rules
+- make only what the task requires
+- validate precisely
+- prepare for review and CI before submission
+
+This version intentionally combines:
+- a quick-start summary
+- strict operating policy
+- an implementation playbook
+- repo-aware validation rules
+
+It is the complete corpus assistant specification for working effectively and safely in Devopness.
+
+---
+
+Version: 2.0
+Updated: 2026-10-04
+Scope: Combined quick-start + operating policy + developer playbook
